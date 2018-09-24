@@ -2,7 +2,7 @@
   "name": "inferno-damage-parser",
   "version": "1.0.0",
   "description": "",
-  "main": "extract_damage.js",
+  "main": "damage_dealt_inferno/extract_damage.js",
   "dependencies": {
     "d3-node": "^2.0.1",
     "demofile": "^0.4.20",

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>three.js webgl - lines - colors</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+        }
+        a {
+            color:#0078ff;
+        }
+        a {
+            color: orange;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #0080ff;
+        }
+    </style>
+</head>
+<body>
+
+<script src="./three.min.js"></script>
+<script src="./Detector.js"></script>
+<script src="./jquery-3.3.1.min.js"></script>
+<script src="./lodash.js"></script>
+
+<script>
+    if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+    var mouseX = 0, mouseY = 0;
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+    var camera, scene, renderer;
+    init();
+    animate();
+    function init() {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 0, 2000 );
+        camera.position.y = 450;
+        camera.position.z = 250;
+        scene = new THREE.Scene();
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+        //
+
+        let posFilter = (position) => true;
+
+        $.get('./navi_vs_astralis_nuke_movement.json', (movementJson) => {
+            // proportionally scale all verts down
+            let allVerts = [];
+            let lives = 0;
+            for (let player in movementJson) {
+                movementJson[player].forEach(round => {
+                    lives++;
+                    round.forEach(position => {
+                        if (posFilter(position)) {
+                            allVerts.push([position.pos.x, position.pos.y, position.pos.z]);
+                        }
+                    });
+                });
+            }
+            console.log(lives);
+            const minX = _.minBy(allVerts, v => v[0])[0];
+            const maxX = _.maxBy(allVerts, v => v[0])[0];
+            const minY = _.minBy(allVerts, v => v[1])[0];
+            const maxY = _.maxBy(allVerts, v => v[1])[0];
+            const minZ = _.minBy(allVerts, v => v[2])[0];
+            const maxZ = _.maxBy(allVerts, v => v[2])[0];
+            const center = {
+                x: (minX + maxX) / 2,
+                y: (minY + maxY) / 2,
+                z: (minZ + maxZ) / 2,
+            };
+            let scale = 0.25;
+            let offset = {
+                x: 0,
+                y: 400,
+                z: 100,
+            };
+            let mapPos = (pos) => {
+                return {
+                    x: (pos.x - center.x) * scale + offset.x,
+                    y: (pos.y - center.y) * scale + offset.y,
+                    z: (pos.z - center.z) * scale + offset.z,
+                };
+            };
+
+
+            for (let player in movementJson) {
+                movementJson[player].forEach(round => {
+                    let vertices = [];
+                    let colors = [];
+                    let roundLineGeometry = new THREE.BufferGeometry();
+                    round.forEach((position, idx) => {
+                        if (posFilter(position)) {
+                            let mappedPos = mapPos(position.pos);
+                            vertices.push(mappedPos.x, mappedPos.y, mappedPos.z);
+                            let hs = position.health / 100;
+                            if (position.team === 'T') {
+                                colors.push(hs * 237 / 255.0, hs * 163 / 255.0, hs * 56 / 255.0);
+                            } else {
+                                colors.push(hs * 104 / 255.0, hs * 163 / 255.0, hs * 229 / 255.0);
+                            }
+                        }
+                    });
+                    roundLineGeometry.addAttribute('position', new THREE.Float32BufferAttribute( vertices, 3 ));
+                    roundLineGeometry.addAttribute('color', new THREE.Float32BufferAttribute( colors, 3 ));
+                    let	material = new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors } );
+                    let line = new THREE.Line(roundLineGeometry,  material);
+                    line.scale.x = line.scale.y = line.scale.z =  1;
+                    line.position.x = 0;
+                    line.position.y = 0;
+                    line.position.z = 0;
+                    scene.add(line);
+                });
+            }
+            //
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+            document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+            //
+            window.addEventListener( 'resize', onWindowResize, false );
+        });
+    }
+    function onWindowResize() {
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+    //
+    function onDocumentMouseMove( event ) {
+        mouseX = event.clientX - windowHalfX;
+        mouseY = event.clientY - windowHalfY;
+    }
+    function onDocumentTouchStart( event ) {
+        if ( event.touches.length > 1 ) {
+            event.preventDefault();
+            mouseX = event.touches[ 0 ].pageX - windowHalfX;
+            mouseY = event.touches[ 0 ].pageY - windowHalfY;
+        }
+    }
+    function onDocumentTouchMove( event ) {
+        if ( event.touches.length == 1 ) {
+            event.preventDefault();
+            mouseX = event.touches[ 0 ].pageX - windowHalfX;
+            mouseY = event.touches[ 0 ].pageY - windowHalfY;
+        }
+    }
+    //
+    function animate() {
+        requestAnimationFrame( animate );
+        render();
+    }
+    function render() {
+        // camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+        // camera.position.y += ( - mouseY + 200 - camera.position.y ) * 0.05;
+        camera.lookAt( scene.position );
+        var time = Date.now() * 0.0005;
+        for ( var i = 0; i < scene.children.length; i ++ ) {
+            var object = scene.children[ i ];
+            if ( object.isLine ) {
+                object.rotation.z = time;
+            }
+        }
+        renderer.render( scene, camera );
+    }
+</script>
+</body>
+</html>
