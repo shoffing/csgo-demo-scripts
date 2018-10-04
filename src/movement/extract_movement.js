@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { fromEvent, forkJoin } = require('rxjs');
 const { map, filter, tap, first } = require('rxjs/operators');
 
-const DEMOS_DIR = '../demos';
+const DEMOS_DIR = '../../demos';
 const TICKS_PER_POS = 16;
 
 const OUTPUT_FILE = 'all_inferno_movement.json';

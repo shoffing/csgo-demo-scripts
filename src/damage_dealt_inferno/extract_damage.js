@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { fromEvent, forkJoin } = require('rxjs');
 const { map, tap, first } = require('rxjs/operators');
 
-DEMOS_DIR = '../demos';
+DEMOS_DIR = '../../demos';
 
 // Find demo files to read
 const INFERNO_DEMOS = fs.readdirSync(DEMOS_DIR)

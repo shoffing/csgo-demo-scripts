@@ -33,7 +33,7 @@ svg.append("rect")
     .attr("fill", "black");
 
 svg.append("image")
-    .attr("xlink:href", fs.readFileSync('inferno_base64'))
+    .attr("xlink:href", fs.readFileSync('../resources/inferno_base64'))
     .attr("width", 2048)
     .attr("height", 2048)
     .attr("opacity", 0.3);
