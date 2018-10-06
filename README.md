@@ -1,7 +1,3 @@
-# inferno-damage-parser
-Reads CS:GO demo files and extracts all damage dealt during the matches.
+# Description
 
-Put demo files in /demos/, then run extract_damage.js. This generates a JSON file containing all the damage dealt in the demos.
-Then run render_damage.js to render an SVG from the generated JSON file.
-
-See inferno_damage_dealt.svg for example output.
+This repo is just a dump for the scripts I'm playing around with to parse CS:GO demo files.
