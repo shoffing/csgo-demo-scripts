@@ -9,9 +9,12 @@
     "lodash": "^4.17.11",
     "rxjs": "^6.3.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "^1.14.3",
+    "pretty-quick": "^1.8.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretty-quick": "pretty-quick"
   },
   "repository": {
     "type": "git",
