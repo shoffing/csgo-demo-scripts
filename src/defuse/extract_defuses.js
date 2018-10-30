@@ -9,7 +9,7 @@ const { getFiles } = require("../util/getFiles");
 const BATCH_SIZE = 4;
 let BATCH_PROCESS_TIMES = [];
 
-const DEMOS_DIR = `E:\\demos`;
+const DEMOS_DIR = `../../demos`;
 const demoFilter = f =>
   !_.startsWith(_.last(f.split(path.sep)), "._") && _.endsWith(f, ".dem");
 
